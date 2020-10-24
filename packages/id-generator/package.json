@@ -4,6 +4,11 @@
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/devstation-co/infrastructure-micromodules",
+		"directory": "packages/id-generator"
+	},
 	"publishConfig": {
 		"access": "public"
 	},
