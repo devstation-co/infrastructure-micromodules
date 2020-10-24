@@ -16,8 +16,8 @@
 		"build": "babel src --out-dir dist --root-mode upward --ignore **/*.spec.js"
 	},
 	"dependencies": {
-		"jsonwebtoken": "^8.5.1",
-		"bcrypt": "^5.0.0"
+		"bcrypt": "^5.0.0",
+		"jsonwebtoken": "^8.5.1"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.11.6",
