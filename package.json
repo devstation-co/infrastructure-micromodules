@@ -1,0 +1,37 @@
+{
+	"name": "infrastructure-micromodules",
+	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
+	"license": "MIT",
+	"scripts": {
+		"bootstrap": "lerna clean -y && lerna bootstrap && yarn run build",
+		"build": "lerna exec --parallel -- babel --root-mode upward src -d dist --ignore **/*.test.js",
+		"publish": "lerna publish",
+		"clean": "lerna clean --yes",
+		"link": "lerna link",
+		"lint": "lerna exec --parallel eslint src",
+		"test": "jest --runInBand --detectOpenHandles --forceExit",
+		"test:watch": "jest --runInBand --detectOpenHandles --watch",
+		"jest:config": "jest --showConfig"
+	},
+	"devDependencies": {
+		"@babel/cli": "^7.11.6",
+		"@babel/core": "^7.11.6",
+		"@babel/eslint-parser": "^7.11.5",
+		"@babel/node": "^7.10.5",
+		"@babel/plugin-proposal-class-properties": "^7.10.4",
+		"@babel/preset-env": "^7.11.5",
+		"eslint": "^7.9.0",
+		"eslint-config-airbnb-base": "^14.2.0",
+		"eslint-config-prettier": "^6.11.0",
+		"eslint-plugin-import": "^2.22.0",
+		"eslint-plugin-security": "^1.4.0",
+		"jest": "^26.4.2",
+		"lerna": "^3.22.1",
+		"nodemon": "^2.0.4",
+		"npm-run-all": "^4.1.5",
+		"prettier": "^2.1.1"
+	},
+	"workspaces": [
+		"packages/*"
+	]
+}

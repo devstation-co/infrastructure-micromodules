@@ -1,0 +1,4 @@
+**/dist
+**/package.js
+**/*.spec.js
+**/*.test.js
