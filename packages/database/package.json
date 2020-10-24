@@ -1,5 +1,5 @@
 {
-	"name": "@devstation-co/database.infrastructure.micromodule",
+	"name": "@devstation.co/database.infrastructure.micromodule",
 	"version": "1.0.0",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
@@ -27,5 +27,6 @@
 		"@babel/preset-env": "^7.11.5",
 		"babel-jest": "^26.3.0",
 		"jest": "^26.4.2"
-	}
+	},
+	"gitHead": "171c31f375a5a0a6c69b73c14a6ed5a463d159f0"
 }
