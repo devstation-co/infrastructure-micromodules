@@ -1,6 +1,6 @@
 {
 	"name": "@devstation.co/nedb.infrastructure.micromodule",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
