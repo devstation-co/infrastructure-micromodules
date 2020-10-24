@@ -16,7 +16,7 @@
 		"build": "babel src --out-dir dist --root-mode upward --ignore **/*.spec.js"
 	},
 	"dependencies": {
-		"@devstation-co/id-generator.infrastructure.micromodule": "^0.1.0",
+		"@devstation.co/id-generator.infrastructure.micromodule": "^1.0.0",
 		"socket.io-client": "^2.3.0"
 	},
 	"devDependencies": {
