@@ -1,6 +1,6 @@
 {
 	"name": "@devstation.co/pwa.infrastructure.micromodule",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
