@@ -1,6 +1,6 @@
 {
 	"name": "@devstation.co/mongodb.infrastructure.micromodule",
-	"version": "1.0.3",
+	"version": "1.0.5",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
