@@ -1,8 +1,8 @@
-import V from 'fastest-validator';
+import FastestValidator from 'fastest-validator';
 
 export default class Validator {
 	constructor() {
-		this.validator = new V();
+		this.validator = new FastestValidator();
 	}
 
 	async validate({ data, schema }) {
