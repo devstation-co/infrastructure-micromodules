@@ -5,8 +5,8 @@ export default class Validator {
 		this.validator = new V();
 	}
 
-	async validate({ toValidate, schema }) {
-		const validationResults = this.validator.validate(toValidate, schema);
+	async validate({ data, schema }) {
+		const validationResults = this.validator.validate(data, schema);
 		if (validationResults !== true) {
 			const error = new Error(JSON.stringify(validationResults));
 			error.name = 'VALIDATION_ERROR';
