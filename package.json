@@ -6,7 +6,7 @@
 	"scripts": {
 		"bootstrap": "lerna clean -y && lerna bootstrap && yarn run build",
 		"build": "lerna exec --parallel -- babel --root-mode upward src -d dist --ignore **/*.test.js",
-		"publish": "lerna publish",
+		"publish": "yarn run build && lerna publish",
 		"clean": "lerna clean --yes",
 		"link": "lerna link",
 		"lint": "lerna exec --parallel eslint src",
