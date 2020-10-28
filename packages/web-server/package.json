@@ -1,6 +1,6 @@
 {
 	"name": "@devstation.co/web-server.infrastructure.micromodule",
-	"version": "1.0.10",
+	"version": "1.0.11",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
