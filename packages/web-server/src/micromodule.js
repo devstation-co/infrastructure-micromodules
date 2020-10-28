@@ -14,9 +14,9 @@ export default class WebServerInfrastructureMicromodule {
 	register({ routes, controllers }) {
 		routes.forEach((route) => {
 			let handler;
-			if (controllers[route.controller] === 'function') {
+			if (typeof controllers[route.controller] === 'function') {
 				handler = controllers[route.controller];
-			} else if (!route.controller && controllers[route.name] === 'function') {
+			} else if (!route.controller && typeof controllers[route.name] === 'function') {
 				handler = controllers[route.name];
 			} else {
 				throw new Error(`${route.name} controller undefined`);
@@ -63,8 +63,8 @@ export default class WebServerInfrastructureMicromodule {
 		return new Promise((resolve) => {
 			const { port } = this;
 			const successEvent = {
-				name: 'webServerInitialized',
-				createdAt: new Date(),
+				status: 'success',
+				timestamp: new Date(),
 				payload: {
 					port,
 				},
