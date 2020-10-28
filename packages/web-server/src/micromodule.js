@@ -40,7 +40,8 @@ export default class WebServerInfrastructureMicromodule {
 						timestamp: new Date(),
 						payload: {
 							source: 'http-api',
-							route: routes.name,
+							route: route.name,
+							reasons: [error.name],
 						},
 					};
 					return res.send(response);
