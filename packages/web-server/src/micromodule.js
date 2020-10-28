@@ -13,11 +13,19 @@ export default class WebServerInfrastructureMicromodule {
 
 	register({ routes, controllers }) {
 		routes.forEach((route) => {
+			let handler;
+			if (controllers[route.controller] === 'function') {
+				handler = controllers[route.controller];
+			} else if (!route.controller && controllers[route.name] === 'function') {
+				handler = controllers[route.name];
+			} else {
+				throw new Error(`${route.name} controller undefined`);
+			}
 			const controller = async (req, res) => {
 				try {
 					const request = req;
 					request.params = req.body;
-					const response = await controllers[route.controller]({ request });
+					const response = await handler({ request });
 					if (response instanceof Error || (response?.stack && response?.message)) {
 						const error = {
 							status: 'error',
