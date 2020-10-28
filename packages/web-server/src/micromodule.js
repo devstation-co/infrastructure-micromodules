@@ -13,7 +13,40 @@ export default class WebServerInfrastructureMicromodule {
 
 	register({ routes, controllers }) {
 		routes.forEach((route) => {
-			this.server[route.method.toLowerCase()](route.path, controllers[route.controller]);
+			const controller = async (req, res) => {
+				try {
+					const request = req;
+					request.params = req.body;
+					const response = await controllers[route.controller]({ request });
+					if (response instanceof Error || (response?.stack && response?.message)) {
+						const error = {
+							status: 'error',
+							timestamp: new Date(),
+							payload: {
+								source: 'http-api',
+								route: route.name,
+								reasons:
+									response.name === 'VALIDATION_ERROR'
+										? JSON.parse(response.message)
+										: [response.message],
+							},
+						};
+						return res.send(error);
+					}
+					return res.send(response);
+				} catch (error) {
+					const response = {
+						status: 'error',
+						timestamp: new Date(),
+						payload: {
+							source: 'http-api',
+							route: routes.name,
+						},
+					};
+					return res.send(response);
+				}
+			};
+			this.server[route.method.toLowerCase()](route.path, controller);
 		});
 	}
 

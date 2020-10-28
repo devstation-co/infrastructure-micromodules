@@ -18,7 +18,7 @@ export default class Database {
 
 	async init() {
 		await this.#db.init();
-		if (this.#seed) await this.#seedDb();
+		if (this.#seed?.collection) await this.#seedDb();
 		return true;
 	}
 
