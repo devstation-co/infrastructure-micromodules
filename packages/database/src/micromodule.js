@@ -69,7 +69,7 @@ export default class Database {
 
 	async findById({ collectionName, id }) {
 		if (!id) throw new Error('Id undefined');
-		const res = await this.#db.findOne({ collectionName, filter: { id } });
+		const res = await this.#db.findById({ collectionName, id });
 		return res;
 	}
 
