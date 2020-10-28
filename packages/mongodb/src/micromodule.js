@@ -1,6 +1,6 @@
 import mongodb from 'mongodb';
 
-export default class MongoDbInfrastructure {
+export default class Mongodb {
 	#logger;
 
 	#db;
@@ -37,8 +37,10 @@ export default class MongoDbInfrastructure {
 	#convertFilterId = ({ filter }) => {
 		const convertedFilter = { ...filter };
 		if (filter._id) {
+			if (!mongodb.ObjectId.isValid(filter._id)) throw new Error('Invalid id');
 			convertedFilter._id = new mongodb.ObjectId(filter._id);
 		} else if (filter.id) {
+			if (!mongodb.ObjectId.isValid(filter.id)) throw new Error('Invalid id');
 			delete convertedFilter.id;
 			convertedFilter._id = new mongodb.ObjectId(filter.id);
 		}
@@ -98,6 +100,7 @@ export default class MongoDbInfrastructure {
 	async findById({ collectionName, id }) {
 		if (!id) throw new Error('Id undefined');
 		if (!collectionName) throw new Error('Collection name undefined');
+		if (!mongodb.ObjectId.isValid(id)) throw new Error('Invalid id');
 		const collection = this.#db.collection(collectionName);
 		const entity = await collection.findOne({ _id: mongodb.ObjectId(id) });
 		const res = this.#changeEntityId({ entity });
