@@ -1,5 +1,5 @@
 import socketIoClient from 'socket.io-client';
-import IdGenerator from '@devstation-co/id-generator.infrastructure.micromodule';
+import IdGenerator from '@devstation.co/id-generator.infrastructure.micromodule';
 
 export default class WebsocketClient {
 	#socket;
