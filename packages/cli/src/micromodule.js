@@ -23,9 +23,13 @@ export default class CLI {
 					await c.controller({ cmd, options: cmd._optionValues });
 					return process.exit();
 				});
-			c.args.forEach((arg) => {
-				const option = `-${arg.alias}, --${arg.name}`;
-				command.option(option, arg.description, arg.default);
+			c.options.forEach((option) => {
+				const o = `-${option.alias}, --${option.name}${option.type === 'string' ? ` <value>` : ''}`;
+				if (option.required) {
+					command.requiredOption(o, option.description);
+				} else {
+					command.option(o, option.description, option.default);
+				}
 			});
 		});
 	};
