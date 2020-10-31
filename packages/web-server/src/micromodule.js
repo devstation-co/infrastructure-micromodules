@@ -9,9 +9,10 @@ export default class WebServerInfrastructureMicromodule {
 		this.server.use(bodyParser.urlencoded({ extended: false }));
 		this.server.use(bodyParser.json());
 		this.server.use(cors());
+		this.router = express.Router();
 	}
 
-	register({ routes, controllers }) {
+	register({ routes, controllers, middlewares }) {
 		routes.forEach((route) => {
 			let handler;
 			if (typeof controllers[route.controller] === 'function') {
@@ -55,7 +56,16 @@ export default class WebServerInfrastructureMicromodule {
 					return res.send(response);
 				}
 			};
-			this.server[route.method.toLowerCase()](route.path, controller);
+
+			this.router[route.method.toLowerCase()](route.path, controller);
+			if (route.middlewares) {
+				route.middlewares.forEach((middleware) => {
+					this.router.use(async (req, res, next) => {
+						await middlewares[`${middleware}`]({ request: req, next });
+					});
+				});
+			}
+			this.server.use('/', this.router);
 		});
 	}
 
