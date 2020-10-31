@@ -9,7 +9,6 @@ export default class WebServerInfrastructureMicromodule {
 		this.server.use(bodyParser.urlencoded({ extended: false }));
 		this.server.use(bodyParser.json());
 		this.server.use(cors());
-		this.router = express.Router();
 	}
 
 	register({ routes, controllers, middlewares }) {
@@ -56,16 +55,17 @@ export default class WebServerInfrastructureMicromodule {
 					return res.send(response);
 				}
 			};
-
-			this.router[route.method.toLowerCase()](route.path, controller);
+			const routeMiddlewares = [];
 			if (route.middlewares) {
 				route.middlewares.forEach((middleware) => {
-					this.router.use(async (req, res, next) => {
+					const middlewareHandler = async (req, res, next) => {
+						req.params = req.body;
 						await middlewares[`${middleware}`]({ request: req, next });
-					});
+					};
+					routeMiddlewares.push(middlewareHandler);
 				});
 			}
-			this.server.use('/', this.router);
+			this.server[route.method.toLowerCase()](route.path, routeMiddlewares, controller);
 		});
 	}
 

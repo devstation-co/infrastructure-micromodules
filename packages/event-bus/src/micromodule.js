@@ -40,7 +40,7 @@ export default class EventBusInfrastructureMicromodule {
 			this.#nc.on('error', (err) => {
 				if (this.#logger)
 					this.#logger.error({
-						message: `Error occured in command-bus nats server: ${err.message}`,
+						message: `Error occured in event-bus nats server: ${err.message}`,
 					});
 			});
 			this.#nc.on('disconnect', () => {
@@ -65,7 +65,7 @@ export default class EventBusInfrastructureMicromodule {
 		});
 	};
 
-	publish(event) {
+	publish({ event }) {
 		this.#nc.publish(event.type, event);
 		return true;
 	}
