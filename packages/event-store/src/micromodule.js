@@ -1,4 +1,4 @@
-export default class EventstoreInfrastructureMicromodule {
+export default class EventStore {
 	#commandBus;
 
 	#token;
@@ -13,7 +13,7 @@ export default class EventstoreInfrastructureMicromodule {
 
 	async commit({ event }) {
 		const res = await this.#commandBus.handle({
-			name: 'commit',
+			name: 'commitEvent',
 			handler: 'eventstore.commands',
 			params: {
 				event,
@@ -23,9 +23,9 @@ export default class EventstoreInfrastructureMicromodule {
 		if (res.status !== 'success') throw new Error('Error in eventstore');
 	}
 
-	async getAggregateEvents({ aggregateId }) {
+	async getEventsByAggregateId({ aggregateId }) {
 		const res = await this.#commandBus.handle({
-			name: 'getAggregateEvents',
+			name: 'getEventsByAggregateId',
 			handler: 'eventstore.queries',
 			params: {
 				aggregateId,
