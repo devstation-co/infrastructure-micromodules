@@ -59,10 +59,10 @@ export default class CommandBusInfrastructureMicromodule {
 
 	subscribeToCommands = ({ commands, namespace }) => {
 		commands.forEach((command) => {
-			const { handler, name, params } = command;
+			const { handler, type, params } = command;
 			this.#subscribe({
 				namespace,
-				commandName: `${namespace}.${name}`,
+				commandName: `${namespace}.${type}`,
 				commandHandler: handler,
 				params,
 			});
@@ -121,9 +121,9 @@ export default class CommandBusInfrastructureMicromodule {
 		);
 	};
 
-	handle({ name, handler, params }) {
+	handle({ type, handler, params }) {
 		return new Promise((resolve) => {
-			this.#nc.request(`${handler}.${name}`, { name, params }, (msg) => {
+			this.#nc.request(`${handler}.${type}`, { type, params }, (msg) => {
 				if (msg instanceof natsDep.NatsError && msg.code === natsDep.REQ_TIMEOUT) {
 					throw new Error('Request timed out');
 				} else {
