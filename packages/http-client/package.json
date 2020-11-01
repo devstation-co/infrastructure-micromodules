@@ -1,5 +1,5 @@
 {
-	"name": "@devstation-co/http-client.infrastructure.micromodule",
+	"name": "@devstation.co/http-client.infrastructure.micromodule",
 	"version": "1.0.22",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
