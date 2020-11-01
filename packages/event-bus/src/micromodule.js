@@ -7,10 +7,13 @@ export default class EventBusInfrastructureMicromodule {
 
 	#logger;
 
+	#validator;
+
 	constructor({ nats, dependencies }) {
-		if (dependencies && dependencies.logger) {
-			this.#logger = dependencies.logger;
-		}
+		if (!dependencies) throw new Error('Dependencies undefined');
+		if (!dependencies.validator) throw new Error('Validator undefined');
+		if (dependencies.logger) this.#logger = dependencies.logger;
+		this.#validator = dependencies.validator;
 		this.host = nats.host;
 		this.username = nats.username;
 		this.#password = nats.password;
@@ -54,13 +57,23 @@ export default class EventBusInfrastructureMicromodule {
 
 	subscribeToEvents = ({ events, namespace }) => {
 		events.forEach((event) => {
-			this.#subscribe({ type: event.type, handler: event.handler, namespace });
+			this.#subscribe({
+				type: event.type,
+				params: event.params,
+				handler: event.handler,
+				namespace,
+			});
 		});
 		return true;
 	};
 
-	#subscribe = ({ type, handler, namespace }) => {
+	#subscribe = ({ type, params, handler, namespace }) => {
 		this.#nc.subscribe(type, { queue: namespace }, async (event) => {
+			if (params) {
+				const schema = params;
+				if (!schema.$$strict) schema.$$strict = 'remove';
+				await this.#validator.validate({ data: params, schema });
+			}
 			await handler({ event });
 		});
 	};
