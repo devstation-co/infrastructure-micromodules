@@ -67,12 +67,17 @@ export default class EventBusInfrastructureMicromodule {
 		return true;
 	};
 
-	#subscribe = ({ type, params, handler, namespace }) => {
+	#subscribe = ({ type, payload, meta, handler, namespace }) => {
 		this.#nc.subscribe(type, { queue: namespace }, async (event) => {
-			if (params) {
-				const schema = params;
-				if (!schema.$$strict) schema.$$strict = 'remove';
-				await this.#validator.validate({ data: params, schema });
+			if (payload) {
+				const payloadSchema = payload;
+				if (!payloadSchema.$$strict) payloadSchema.$$strict = 'remove';
+				await this.#validator.validate({ data: payload, payloadSchema });
+			}
+			if (meta) {
+				const metaSchema = meta;
+				if (!metaSchema.$$strict) metaSchema.$$strict = 'remove';
+				await this.#validator.validate({ data: payload, metaSchema });
 			}
 			await handler({ event });
 		});
