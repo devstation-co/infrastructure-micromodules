@@ -8,14 +8,18 @@ export default class CommandBusInfrastructureMicromodule {
 
 	#logger;
 
+	#validator;
+
 	constructor({ nats, dependencies }) {
-		if (dependencies && dependencies.logger) {
-			this.#logger = dependencies.logger;
-		}
+		if (!dependencies) throw new Error('Dependencies undefined');
+		if (!dependencies.validator) throw new Error('Validator undefined');
+		this.#validator = dependencies.validator;
+		if (dependencies.logger) this.#logger = dependencies.logger;
 		this.host = nats.host;
 		this.port = nats.port;
 		this.username = nats.username;
 		this.#password = nats.password;
+		this.commands = [];
 	}
 
 	async init() {
@@ -55,24 +59,30 @@ export default class CommandBusInfrastructureMicromodule {
 
 	subscribeToCommands = ({ commands, namespace }) => {
 		commands.forEach((command) => {
-			const { handler, name } = command;
+			const { handler, name, params } = command;
 			this.#subscribe({
 				namespace,
 				commandName: `${namespace}.${name}`,
 				commandHandler: handler,
+				params,
 			});
 		});
 		return true;
 	};
 
-	#subscribe = ({ namespace, commandName, commandHandler }) => {
+	#subscribe = ({ namespace, commandName, params, commandHandler }) => {
 		this.#nc.subscribe(
 			commandName,
 			{ queue: namespace },
 			async (receivedCommand, commandSenderName) => {
 				try {
+					if (params) {
+						const schema = params;
+						if (!schema.$$strict) schema.$$strict = 'remove';
+						await this.#validator.validate({ data: receivedCommand.params, schema });
+					}
 					const options = {
-						timeout: 3000, // If our function takes longer than 3 seconds, trigger a failure
+						timeout: 3000,
 					};
 					const breaker = new CircuitBreaker(commandHandler, options);
 					const handlerResponse = await breaker.fire(receivedCommand);
@@ -84,7 +94,7 @@ export default class CommandBusInfrastructureMicromodule {
 							status: 'error',
 							timestamp: new Date(),
 							payload: {
-								source: 'websocket-server',
+								source: 'command-bus',
 								reasons:
 									handlerResponse.name === 'VALIDATION_ERROR'
 										? JSON.parse(handlerResponse.message)

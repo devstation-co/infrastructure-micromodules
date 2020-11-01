@@ -11,7 +11,7 @@ export default class WebServer {
 
 	constructor({ port, dependencies }) {
 		if (!dependencies) throw new Error('Dependencies undefined');
-		if (!dependencies.validator) throw new Error('Validator undefinec');
+		if (!dependencies.validator) throw new Error('Validator undefined');
 		this.#validator = dependencies.validator;
 		this.#port = port;
 		this.#server = express();
