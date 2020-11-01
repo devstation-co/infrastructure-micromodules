@@ -10,7 +10,13 @@ export default class WebsocketServerInfrastructureMicromodule {
 
 	#io;
 
-	constructor({ port, redis, namespace }) {
+	#validator;
+
+	constructor({ port, redis, namespace, dependencies }) {
+		if (!dependencies) throw new Error('Dependencies undefined');
+		if (!dependencies.validator) throw new Error('Validator undefined');
+		if (!port) throw new Error('Port undefined');
+		if (!redis) throw new Error('Redis settings undefined');
 		this.port = port;
 		const app = express();
 		app.use(cors());
@@ -54,12 +60,12 @@ export default class WebsocketServerInfrastructureMicromodule {
 				if (request.middlewares) {
 					request.middlewares.forEach((middleware) => {
 						if (
-							typeof middlewares[`${request.name.split('.')[0]}.${middleware}`] !== 'function' &&
+							typeof middlewares[`${request.type.split('.')[0]}.${middleware}`] !== 'function' &&
 							typeof middlewares[`${middleware}`] !== 'function'
 						)
-							throw new Error(`Middleware undefined in ${request.name}`);
+							throw new Error(`Middleware undefined in ${request.type}`);
 						connectedSocket.use(async (packet, next) => {
-							if (packet[0] === request.name) {
+							if (packet[0] === request.type) {
 								await middlewares[`${middleware}`]({
 									socket: connectedSocket,
 									request: packet[1],
@@ -71,7 +77,12 @@ export default class WebsocketServerInfrastructureMicromodule {
 						});
 					});
 				}
-				connectedSocket.on(request.name, async (data, callback) => {
+				connectedSocket.on(request.type, async (data, callback) => {
+					if (request.params) {
+						const schema = request.params;
+						if (!schema.$$strict) schema.$$strict = 'remove';
+						await this.#validator.validate({ data: request.params, schema });
+					}
 					try {
 						const response = await request.controller({ socket: connectedSocket, request: data });
 						if (response instanceof Error || (response?.stack && response?.message)) {
@@ -102,7 +113,7 @@ export default class WebsocketServerInfrastructureMicromodule {
 						return callback(response);
 					}
 				});
-				this.requests.push(request.name);
+				this.requests.push(request.type);
 			});
 		});
 	};
@@ -116,17 +127,17 @@ export default class WebsocketServerInfrastructureMicromodule {
 	};
 
 	broadcast(request) {
-		this.#io.emit(request.name, request);
+		this.#io.emit(request.type, request);
 	}
 
 	broadcastIn(rooms, request) {
 		rooms.forEach((room) => {
-			this.#io.in(room).emit(request.name, request);
+			this.#io.in(room).emit(request.type, request);
 		});
 	}
 
 	emit(socketId, request) {
-		this.#io.to(socketId).emit(request.name, request);
+		this.#io.to(socketId).emit(request.type, request);
 	}
 
 	run() {
