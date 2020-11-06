@@ -1,8 +1,15 @@
 import FastestValidator from 'fastest-validator';
+import ObjectID from 'bson-objectid';
 
 export default class Validator {
 	constructor() {
-		this.validator = new FastestValidator();
+		this.validator = new FastestValidator({
+			defaults: {
+				objectID: {
+					ObjectID,
+				},
+			},
+		});
 	}
 
 	async validate({ data, schema }) {

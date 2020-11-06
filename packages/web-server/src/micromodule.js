@@ -43,6 +43,13 @@ export default class WebServer {
 							case 'get':
 								await this.#validator.validate({ data: request.params, schema });
 								break;
+							case 'put':
+								await this.#validator.validate({ data: request.body, schema });
+								await this.#validator.validate({ data: request.params, schema });
+								break;
+							case 'delete':
+								await this.#validator.validate({ data: request.params, schema });
+								break;
 							default:
 								break;
 						}
