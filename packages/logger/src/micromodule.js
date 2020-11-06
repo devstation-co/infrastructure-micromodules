@@ -37,7 +37,7 @@ export default class LoggerInfrastructureMicromodule {
 		});
 		const logger = winston.createLogger({
 			defaultMeta: {
-				source,
+				mainSource: source,
 			},
 			levels: {
 				error: 0,
@@ -52,7 +52,8 @@ export default class LoggerInfrastructureMicromodule {
 	};
 
 	#consoleFormatter = ({ mainSource }) => {
-		const formatter = winston.format.printf(({ level, message, source }) => {
+		const formatter = winston.format.printf((params) => {
+			const { level, message, source } = params;
 			const colors = {
 				yellow: '\u001b[33m',
 				red: ' \u001b[31m',
@@ -81,7 +82,7 @@ export default class LoggerInfrastructureMicromodule {
 					break;
 			}
 			let messageToshow = message;
-			if (source?.service)
+			if (typeof source?.service === 'string')
 				messageToshow = `${message} | Service: ${source.service} | Module: ${source.module} | Layer type: ${source.layer.type} | Layer Name: ${source.layer.name} | Method name: ${source.method.name} | Method type: ${source.method.type}`;
 
 			const output = `\u001b[30;1m${new Date()
