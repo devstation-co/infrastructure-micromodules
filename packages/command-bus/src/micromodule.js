@@ -125,7 +125,8 @@ export default class CommandBusInfrastructureMicromodule {
 		const breaker = new CircuitBreaker(this.#request, {
 			timeout: 3000,
 		});
-		await breaker.fire({ type, handler, params });
+		const res = await breaker.fire({ type, handler, params });
+		return res;
 	}
 
 	#request = ({ type, handler, params }) => {
