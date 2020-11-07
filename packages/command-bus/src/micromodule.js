@@ -121,15 +121,22 @@ export default class CommandBusInfrastructureMicromodule {
 		);
 	};
 
-	handle({ type, handler, params }) {
-		return new Promise((resolve) => {
+	async handle({ type, handler, params }) {
+		const breaker = new CircuitBreaker(this.#request, {
+			timeout: 3000,
+		});
+		await breaker.fire({ type, handler, params });
+	}
+
+	#request = ({ type, handler, params }) => {
+		return new Promise((resolve, reject) => {
 			this.#nc.request(`${handler}.${type}`, { type, params }, (msg) => {
-				if (msg instanceof natsDep.NatsError && msg.code === natsDep.REQ_TIMEOUT) {
-					throw new Error('Request timed out');
+				if (msg instanceof natsDep.NatsError) {
+					reject(new Error(msg.code));
 				} else {
 					resolve(msg);
 				}
 			});
 		});
-	}
+	};
 }

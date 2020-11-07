@@ -7,6 +7,7 @@
 		"bootstrap": "lerna clean -y && lerna bootstrap && yarn run build",
 		"build": "lerna exec --parallel -- babel --root-mode upward src -d dist --ignore **/*.test.js",
 		"publish": "yarn run build && lerna publish",
+		"update": "lernaupdate",
 		"clean": "lerna clean --yes && rimraf node_modules",
 		"link": "lerna link",
 		"lint": "lerna exec --parallel eslint src",
