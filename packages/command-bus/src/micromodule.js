@@ -31,7 +31,7 @@ export default class CommandBusInfrastructureMicromodule {
 				json: true,
 				maxReconnectAttempts: -1,
 				reconnectTimeWait: 3000,
-				timeout: 5000,
+				timeout: 10000,
 				waitOnFirstConnect: true,
 				pingInterval: 5000,
 			});
@@ -82,7 +82,7 @@ export default class CommandBusInfrastructureMicromodule {
 						await this.#validator.validate({ data: receivedCommand.params, schema });
 					}
 					const options = {
-						timeout: 3000,
+						timeout: 10000,
 					};
 					const breaker = new CircuitBreaker(commandHandler, options);
 					const handlerResponse = await breaker.fire(receivedCommand);
@@ -123,7 +123,7 @@ export default class CommandBusInfrastructureMicromodule {
 
 	async handle({ type, handler, params }) {
 		const breaker = new CircuitBreaker(this.#request, {
-			timeout: 3000,
+			timeout: 10000,
 		});
 		const res = await breaker.fire({ type, handler, params });
 		return res;
