@@ -1,6 +1,6 @@
 {
 	"name": "@devstation.co/http-client.infrastructure.micromodule",
-	"version": "1.0.23",
+	"version": "1.0.30",
 	"license": "MIT",
 	"author": "Mohamed Oualid Sellal <oualid.sellal@gmail.com>",
 	"main": "package.js",
