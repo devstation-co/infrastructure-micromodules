@@ -3,8 +3,17 @@ import axios from 'axios';
 export default class HttpClient {
 	#client;
 
+	#baseUrl;
+
+	#timeout;
+
+	#headers;
+
 	constructor({ baseUrl, headers, timeout }) {
-		if (!baseUrl) throw new Error('baseUrl undefined');
+		if (!baseUrl) throw new Error('BaseUrlUndefined');
+		this.#baseUrl = baseUrl;
+		if (headers) this.#headers = headers;
+		if (timeout) this.#timeout = timeout;
 		this.#client = axios.create({
 			baseURL: baseUrl,
 			timeout: timeout || 1000,
@@ -23,6 +32,33 @@ export default class HttpClient {
 		}
 		return '';
 	};
+
+	setHeaders({ headers }) {
+		if (!headers) throw Error('HeadersUndefined');
+		this.#headers = headers;
+		this.#client = axios.create({
+			baseURL: this.#baseUrl,
+			timeout: this.#timeout || 1000,
+			headers,
+		});
+	}
+
+	clearHeaders() {
+		this.#headers = {};
+		this.#client = axios.create({
+			baseURL: this.#baseUrl,
+			timeout: this.#timeout || 1000,
+			headers: {},
+		});
+	}
+
+	getHeaders() {
+		return this.#headers;
+	}
+
+	getBaseUrl() {
+		return this.#baseUrl;
+	}
 
 	async get({ path, params }) {
 		const res = await this.#client.get(`${path}?${this.#convertParams({ params })}`);
