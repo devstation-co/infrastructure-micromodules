@@ -82,7 +82,7 @@ export default class WebsocketServerInfrastructureMicromodule {
 					if (request.params) {
 						const schema = request.params;
 						if (!schema.$$strict) schema.$$strict = 'remove';
-						await this.#validator.validate({ data: request.params, schema });
+						await this.#validator.validate({ data: data.params, schema });
 					}
 					try {
 						const response = await request.controller({ socket: connectedSocket, request: data });
