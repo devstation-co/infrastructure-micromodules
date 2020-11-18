@@ -9,7 +9,7 @@ export default class PwaEventBusInfrastructure {
 
 	subscribe({ events }) {
 		events.forEach((event) => {
-			this.#transporter.$on(event.name, async (receivedEvent) => {
+			this.#transporter.$on(event.type, async (receivedEvent) => {
 				if (event.handlers) {
 					const promises = [];
 					event.handlers.forEach((h) => {
@@ -19,7 +19,7 @@ export default class PwaEventBusInfrastructure {
 				} else if (event.handler) {
 					await event.handler(receivedEvent);
 				} else {
-					throw new Error(`${event.name} handler undefined`);
+					throw new Error(`${event.type} handler undefined`);
 				}
 			});
 		});
@@ -31,7 +31,7 @@ export default class PwaEventBusInfrastructure {
 		});
 	}
 
-	publish({ name, payload }) {
-		this.#transporter.$emit(name, { name, payload });
+	publish({ type, payload }) {
+		this.#transporter.$emit(type, { type, payload });
 	}
 }

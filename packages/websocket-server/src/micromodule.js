@@ -17,6 +17,7 @@ export default class WebsocketServerInfrastructureMicromodule {
 		if (!dependencies.validator) throw new Error('Validator undefined');
 		if (!port) throw new Error('Port undefined');
 		if (!redis) throw new Error('Redis settings undefined');
+		this.#validator = dependencies.validator;
 		this.port = port;
 		const app = express();
 		app.use(cors());
