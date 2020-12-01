@@ -36,6 +36,10 @@ export default class PwaDbInfrastructure {
 		return this.filterArray(this.state[`${collectionName}`], filter)[0];
 	}
 
+	async findById({ collectionName, id }) {
+		return this.filterArray(this.state[`${collectionName}`], { id })[0];
+	}
+
 	async find({ collectionName, filter }) {
 		const res = this.filterArray(this.state[`${collectionName}`], filter);
 		return res;
