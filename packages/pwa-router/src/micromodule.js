@@ -43,11 +43,11 @@ export default class PwaRouterInfrastructure {
 		this.#router.addRoutes(routes);
 	}
 
-	goTo({ name, path }) {
+	goTo({ name, path, params = {} }) {
 		if (name) {
-			this.#router.push({ name });
+			this.#router.push({ name, params });
 		} else if (path) {
-			this.#router.push({ path });
+			this.#router.push({ path, params });
 		} else {
 			throw new Error('Name or path undefined');
 		}
