@@ -72,26 +72,32 @@ export default class WebsocketClient {
 
 	subscribe({ events }) {
 		events.forEach((event) => {
-			if (typeof event.handler !== 'function')
+			if (typeof event.handler !== 'function' && !event.handlers)
 				throw new Error(`${event.type} event handler is not a function`);
+			if (!event.handler && !event.handlers)
+				throw new Error(`${event.type} event handler undefined`);
+			if (!event.handler && event.handlers.length === 0)
+				throw new Error(`${event.type} event handler undefined`);
+			if (event.handlers) {
+				event.handlers.forEach((eventHandler) => {
+					if (typeof eventHandler !== 'function')
+						throw new Error(`${event.type} event handler is not a function`);
+				});
+			}
 			this.#socket.on(event.type, async (receivedEvent) => {
 				if (event.handlers) {
 					const promises = [];
 					event.handlers.forEach((handler) => {
 						promises.push(
 							handler({
-								params: {
-									event: receivedEvent,
-								},
+								event: receivedEvent,
 							}),
 						);
 					});
 					await Promise.all(promises);
 				} else if (event.handler) {
 					await event.handler({
-						params: {
-							event: receivedEvent,
-						},
+						event: receivedEvent,
 					});
 				} else {
 					throw new Error(`${event.type} handler undefined`);
