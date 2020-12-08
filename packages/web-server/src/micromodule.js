@@ -34,21 +34,30 @@ export default class WebServer {
 				try {
 					const request = req;
 					if (route.params) {
-						const schema = route.params;
-						if (!schema.$$strict) schema.$$strict = 'remove';
+						const bodySchema = route.body;
+						const paramsSchema = route.params;
+						if (bodySchema && !bodySchema.$$strict) bodySchema.$$strict = 'remove';
+						if (paramsSchema && !paramsSchema.$$strict) paramsSchema.$$strict = 'remove';
 						switch (route.method) {
 							case 'post':
-								await this.#validator.validate({ data: request.body, schema });
+								if (paramsSchema)
+									await this.#validator.validate({ data: request.params, schema: paramsSchema });
+								if (bodySchema)
+									await this.#validator.validate({ data: request.body, schema: bodySchema });
 								break;
 							case 'get':
-								await this.#validator.validate({ data: request.params, schema });
+								if (paramsSchema)
+									await this.#validator.validate({ data: request.params, schema: paramsSchema });
 								break;
 							case 'put':
-								await this.#validator.validate({ data: request.body, schema });
-								await this.#validator.validate({ data: request.params, schema });
+								if (bodySchema)
+									await this.#validator.validate({ data: request.body, schema: bodySchema });
+								if (paramsSchema)
+									await this.#validator.validate({ data: request.params, schema: paramsSchema });
 								break;
 							case 'delete':
-								await this.#validator.validate({ data: request.params, schema });
+								if (paramsSchema)
+									await this.#validator.validate({ data: request.params, schema: paramsSchema });
 								break;
 							default:
 								break;
@@ -78,7 +87,8 @@ export default class WebServer {
 						payload: {
 							source: 'web-server',
 							route: route.name,
-							reasons: [error.name],
+							reasons:
+								error.name === 'VALIDATION_ERROR' ? JSON.parse(error.message) : [error.message],
 						},
 					};
 					return res.send(response);
@@ -88,8 +98,7 @@ export default class WebServer {
 			if (route.middlewares) {
 				route.middlewares.forEach((middleware) => {
 					const middlewareHandler = async (req, res, next) => {
-						req.params = req.body;
-						await middlewares[`${middleware}`]({ request: req, next });
+						await middlewares[`${middleware}`]({ request: req, response: res, next });
 					};
 					routeMiddlewares.push(middlewareHandler);
 				});
