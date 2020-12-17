@@ -1,90 +1,85 @@
-import natsDep from 'nats';
+/* eslint-disable no-await-in-loop */
+import { Kafka } from 'kafkajs';
 
 export default class EventBusInfrastructureMicromodule {
-	#nc;
+	#producer;
 
-	#password;
+	#consumer;
 
 	#logger;
 
 	#validator;
 
-	constructor({ nats, dependencies }) {
-		if (!dependencies) throw new Error('Dependencies undefined');
-		if (!dependencies.validator) throw new Error('Validator undefined');
+	constructor({ kafka, dependencies }) {
+		if (!dependencies) throw new Error('DependenciesUndefined');
+		if (!dependencies.validator) throw new Error('ValidatorUndefined');
+		if (!kafka) throw new Error('KafkaSettingsUndefined');
 		if (dependencies.logger) this.#logger = dependencies.logger;
 		this.#validator = dependencies.validator;
-		this.host = nats.host;
-		this.username = nats.username;
-		this.#password = nats.password;
-		this.port = nats.port;
+		this.brokers = kafka.brokers;
+		this.clientId = kafka.clientId;
 	}
 
-	init() {
-		return new Promise((resolve) => {
-			this.#nc = natsDep.connect({
-				url: `nats://${this.host}:${this.port}`,
-				user: this.username,
-				pass: this.#password,
-				json: true,
-				maxReconnectAttempts: -1,
-				reconnectTimeWait: 3000,
-				timeout: 5000,
-				waitOnFirstConnect: true,
-				pingInterval: 5000,
-			});
-			this.#nc.on('connect', () => {
-				if (this.#logger)
-					this.#logger.success({
-						message: 'Event-bus connected to nats server',
-					});
-				resolve();
-			});
-			this.#nc.on('error', (err) => {
-				if (this.#logger)
-					this.#logger.error({
-						message: `Error occured in event-bus nats server: ${err.message}`,
-					});
-			});
-			this.#nc.on('disconnect', () => {
-				if (this.#logger)
-					this.#logger.info({
-						message: 'Event-bus Disconnected from nats server',
-					});
-			});
+	async init() {
+		const kafka = new Kafka({
+			clientId: this.clientId,
+			brokers: this.brokers,
 		});
+		this.#producer = kafka.producer();
+		this.#consumer = kafka.consumer({ groupId: this.clientId });
+		await this.#producer.connect();
+		await this.#consumer.connect();
+		return true;
 	}
 
-	subscribeToEvents = ({ events, namespace }) => {
+	subscribeToEvents = async ({ events }) => {
+		const topics = [];
 		events.forEach((event) => {
-			this.#subscribe({
-				type: event.type,
-				params: event.params,
-				handler: event.handler,
-				namespace,
-			});
+			if (topics.indexOf(event.aggregate) === -1) topics.push(event.aggregate);
+		});
+		for (let index = 0; index < topics.length; index += 1) {
+			const topic = topics[`${index}`];
+			await this.#consumer.subscribe({ topic, fromBeginning: true });
+		}
+		const eventsMap = new Map();
+		events.forEach((event) => {
+			eventsMap.set(event.type, event);
+		});
+		await this.#consumer.run({
+			eachMessage: async ({ topic, partition, message }) => {
+				const receivedEvent = JSON.parse(message.value.toString());
+				if (eventsMap.has(receivedEvent.type)) {
+					const event = eventsMap.get(receivedEvent.type);
+					if (event.payload) {
+						const payloadSchema = event.payload;
+						if (!payloadSchema.$$strict) payloadSchema.$$strict = 'remove';
+						await this.#validator.validate({
+							data: receivedEvent.payload,
+							schema: payloadSchema,
+						});
+					}
+					if (event.meta) {
+						const metaSchema = event.meta;
+						if (!metaSchema.$$strict) metaSchema.$$strict = 'remove';
+						await this.#validator.validate({ data: receivedEvent.meta, schema: metaSchema });
+					}
+					await event.handler({ event: receivedEvent, topic, partition });
+				}
+			},
 		});
 		return true;
 	};
 
-	#subscribe = ({ type, payload, meta, handler, namespace }) => {
-		this.#nc.subscribe(type, { queue: namespace }, async (event) => {
-			if (payload) {
-				const payloadSchema = payload;
-				if (!payloadSchema.$$strict) payloadSchema.$$strict = 'remove';
-				await this.#validator.validate({ data: payload, payloadSchema });
-			}
-			if (meta) {
-				const metaSchema = meta;
-				if (!metaSchema.$$strict) metaSchema.$$strict = 'remove';
-				await this.#validator.validate({ data: payload, metaSchema });
-			}
-			await handler({ event });
+	async publish({ event }) {
+		await this.#producer.send({
+			topic: event.aggregate.type,
+			messages: [
+				{
+					key: event.aggregate.id,
+					value: JSON.stringify(event),
+				},
+			],
 		});
-	};
-
-	publish({ event }) {
-		this.#nc.publish(event.type, event);
 		return true;
 	}
 }

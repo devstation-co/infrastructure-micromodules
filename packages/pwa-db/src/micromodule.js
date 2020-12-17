@@ -4,12 +4,25 @@ import lodash from 'lodash';
 export default class PwaDbInfrastructure {
 	#store;
 
-	constructor({ collections }) {
+	constructor({ collections, keyGroups }) {
 		this.state = {};
 		this.getters = {};
+		keyGroups.forEach((group) => {
+			group.keys.forEach((key) => {
+				this.setKey({ group: group.name, key });
+			});
+		});
 		collections.forEach((collection) => {
 			this.state[`${collection}`] = [];
 		});
+	}
+
+	setKey({ group, key }) {
+		this.state[`${group}`][`${key}`] = '';
+	}
+
+	getKey({ group, key }) {
+		return this.state[`${group}`][`${key}`];
 	}
 
 	// eslint-disable-next-line class-methods-use-this
