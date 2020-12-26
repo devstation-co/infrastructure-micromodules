@@ -43,13 +43,13 @@ export default class EventBusInfrastructureMicromodule {
 		}
 		const eventsMap = new Map();
 		events.forEach((event) => {
-			eventsMap.set(event.type, event);
+			eventsMap.set(`${event.aggregate}.${event.type}`, event);
 		});
 		await this.#consumer.run({
 			eachMessage: async ({ topic, partition, message }) => {
 				const receivedEvent = JSON.parse(message.value.toString());
-				if (eventsMap.has(receivedEvent.type)) {
-					const event = eventsMap.get(receivedEvent.type);
+				if (eventsMap.has(`${receivedEvent.aggregate.type}.${receivedEvent.type}`)) {
+					const event = eventsMap.get(`${receivedEvent.aggregate.type}.${receivedEvent.type}`);
 					if (event.payload) {
 						const payloadSchema = event.payload;
 						if (!payloadSchema.$$strict) payloadSchema.$$strict = 'remove';

@@ -14,7 +14,7 @@ export default class EventStore {
 	async commit({ event }) {
 		const res = await this.#commandBus.handle({
 			type: 'commitEvent',
-			handler: 'event-store.commands',
+			handler: 'event-store.main.command-listener',
 			params: {
 				event,
 				token: this.#token,
@@ -26,7 +26,7 @@ export default class EventStore {
 	async getEventsByAggregateId({ aggregateId }) {
 		const res = await this.#commandBus.handle({
 			type: 'getEventsByAggregateId',
-			handler: 'event-store.queries',
+			handler: 'event-store.main.query-listener',
 			params: {
 				aggregateId,
 				token: this.#token,
@@ -39,7 +39,7 @@ export default class EventStore {
 	async getAllEvents() {
 		const res = await this.#commandBus.handle({
 			type: 'getAllEvents',
-			handler: 'event-store.queries',
+			handler: 'event-store.main.query-listener',
 			params: {
 				token: this.#token,
 			},
